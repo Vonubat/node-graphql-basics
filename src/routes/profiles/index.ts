@@ -6,9 +6,10 @@ import type { ProfileEntity } from '../../utils/DB/entities/DBProfiles';
 const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
   fastify
 ): Promise<void> => {
-  fastify.get('/', async function (request, reply): Promise<
-    ProfileEntity[]
-  > {});
+  fastify.get('/', async function (request, reply): Promise<ProfileEntity[]> {
+    const profiles: ProfileEntity[] = await fastify.db.profiles.findMany();
+    return profiles;
+  });
 
   fastify.get(
     '/:id',
@@ -17,7 +18,19 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+      const { id: profileId } = request.params;
+
+      const foundedProfile: ProfileEntity | null =
+        await fastify.db.profiles.findOne({
+          key: 'id',
+          equals: profileId,
+        });
+      if (!foundedProfile) {
+        throw fastify.httpErrors.notFound();
+      }
+      return foundedProfile;
+    }
   );
 
   fastify.post(
@@ -27,7 +40,14 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         body: createProfileBodySchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+      const { body: profileDTO } = request;
+
+      const createdProfile: ProfileEntity = await fastify.db.profiles.create(
+        profileDTO
+      );
+      return createdProfile;
+    }
   );
 
   fastify.delete(
@@ -37,7 +57,23 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+      const { id: profileId } = request.params;
+
+      const foundedProfile: ProfileEntity | null =
+        await fastify.db.profiles.findOne({
+          key: 'id',
+          equals: profileId,
+        });
+      if (!foundedProfile) {
+        throw fastify.httpErrors.notFound();
+      }
+
+      const deletedProfile: ProfileEntity = await fastify.db.profiles.delete(
+        profileId
+      );
+      return deletedProfile;
+    }
   );
 
   fastify.patch(
@@ -48,7 +84,25 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         params: idParamSchema,
       },
     },
-    async function (request, reply): Promise<ProfileEntity> {}
+    async function (request, reply): Promise<ProfileEntity> {
+      const { id: profileId } = request.params;
+      const { body: profileDTO } = request;
+
+      const foundedProfile: ProfileEntity | null =
+        await fastify.db.profiles.findOne({
+          key: 'id',
+          equals: profileId,
+        });
+      if (!foundedProfile) {
+        throw fastify.httpErrors.notFound();
+      }
+
+      const updatedProfile: ProfileEntity = await fastify.db.profiles.change(
+        profileId,
+        profileDTO
+      );
+      return updatedProfile;
+    }
   );
 };
 
