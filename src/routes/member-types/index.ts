@@ -54,7 +54,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
           equals: memberTypeId,
         });
       if (!foundedMemberType) {
-        throw fastify.httpErrors.notFound();
+        throw fastify.httpErrors.badRequest('MemberType not found');
       }
 
       const updatedMemberType: MemberTypeEntity =
