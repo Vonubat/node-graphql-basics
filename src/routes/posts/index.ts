@@ -26,7 +26,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         equals: postId,
       });
       if (!foundedPost) {
-        throw fastify.httpErrors.notFound();
+        throw fastify.httpErrors.notFound('Post not found');
       }
       return foundedPost;
     }
@@ -62,7 +62,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         equals: postId,
       });
       if (!foundedPost) {
-        throw fastify.httpErrors.notFound();
+        throw fastify.httpErrors.badRequest(`Post doesn't exist`);
       }
 
       const deletedPost: PostEntity = await fastify.db.posts.delete(postId);
@@ -87,7 +87,7 @@ const plugin: FastifyPluginAsyncJsonSchemaToTs = async (
         equals: postId,
       });
       if (!foundedPost) {
-        throw fastify.httpErrors.notFound();
+        throw fastify.httpErrors.badRequest(`Post doesn't exist`);
       }
 
       const updatedPost: PostEntity = await fastify.db.posts.change(
